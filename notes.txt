@@ -1,0 +1,17 @@
+TODO:
+HOG with OpenCV
+SVM classification with histogram intersection/chi square kernels
+How to utilize color information?
+Dimensionality reduction (at least we can remove the white background)
+kNN is theoretically unstable in 128 dimensional space due to curse of dimensionality, but in practice, it is surprisingly accurate. Why?
+
+Project Timeline:
+Mar 27 [Libo]: Project proposal submitted.
+Apr 11 [Libo]: Pseudocode with SIFT and kNN.
+Apr 13 [Libo]: Prototype with SIFT and kNN on cosine distance. 80% accuracy. 
+Apr 14 [Libo]: GitHub repo created.
+Apr 14 [Libo]: Tried custom kNN metric function: dist(a,b)=cos_dist(a,b) * abs(a.sift_scale - b.sift_scale). 50% accuracy.
+Apr 15 [Libo]: Migrated to scikit-learn framework. Experiment repeated 10 times on randomly train/test splits for stable result.
+
+Demo due: May 18-29
+Report due: June 1-12
