@@ -1,5 +1,9 @@
 TODO:
-HOG with OpenCV
+Minimal Bag of Visual Words Image Classifier. ref:
+	https://github.com/shackenberg/Minimal-Bag-of-Visual-Words-Image-Classifier
+HOG with OpenCV. ref:
+	http://stackoverflow.com/questions/17159885/histogram-of-oriented-gradients-object-detection
+	http://www.mathworks.com/matlabcentral/fileexchange/28689-hog-descriptor-for-matlab/content/HOG.m
 SVM classification with histogram intersection/chi square kernels
 How to utilize color information?
 Dimensionality reduction (at least we can remove the white background)
