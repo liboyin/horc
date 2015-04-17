@@ -9,6 +9,8 @@ How to utilize color information?
 Dimensionality reduction (at least we can remove the white background)
 kNN is theoretically unstable in 128 dimensional space due to curse of dimensionality, but in practice, it is surprisingly accurate. Why?
 
+[Sakda, Apr 17] followed Sentdex Image Recognition. This gave real bad result, might need to project, rotate, translate images before testing
+
 Project Timeline:
 Mar 27 [Libo]: Project proposal submitted.
 Apr 11 [Libo]: Pseudocode with SIFT and kNN.
