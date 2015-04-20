@@ -6,10 +6,7 @@ HOG with OpenCV. ref:
 	http://www.mathworks.com/matlabcentral/fileexchange/28689-hog-descriptor-for-matlab/content/HOG.m
 SVM classification with histogram intersection/chi square kernels
 How to utilize color information?
-Dimensionality reduction (at least we can remove the white background)
 kNN is theoretically unstable in 128 dimensional space due to curse of dimensionality, but in practice, it is surprisingly accurate. Why?
-
-[Sakda, Apr 17] followed Sentdex Image Recognition. This gave real bad result, might need to project, rotate, translate images before testing
 
 Project Timeline:
 Mar 27 [Libo]: Project proposal submitted.
@@ -18,6 +15,10 @@ Apr 13 [Libo]: Prototype with SIFT and kNN on cosine distance. 80% accuracy.
 Apr 14 [Libo]: GitHub repo created.
 Apr 14 [Libo]: Tried custom kNN metric function: dist(a,b)=cos_dist(a,b) * abs(a.sift_scale - b.sift_scale). 50% accuracy.
 Apr 15 [Libo]: Migrated to scikit-learn framework. Experiment repeated 10 times on randomly train/test splits for stable result.
+Apr 17 [Sakda]: Followed Sentdex Image Recognition. This gave real bad result, might need to project, rotate, translate images before testing.
+Apr 20 [Libo]: Tried SVM with different kernels on default options. linear kernel gives 65% accuracy, polynomial kernel gives 83% accuracy, others lower than 5%.
+Apr 20 [Libo]: Tried random forest with both criterias on default options. Gini gives 58% accuracy, entropy gives 55% accuracy.
+Apr 20 [Libo]: Tried decision tree with both criterias on default options. Gini gives 52% accuracy, entropy gives 50% accuracy.
 
 Demo due: May 18-29
 Report due: June 1-12
