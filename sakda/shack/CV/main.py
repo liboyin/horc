@@ -19,7 +19,7 @@ predict_file = outputdir + '/trainingdata.svm.prediction'
 imagedir = '../dataset'
 basename = imagedir + '/image'
 ext = '.JPG'
-maxfile = 20 #last file is image249.JPG, enter 250 for train-test all of them. To train-test some of them, change to a smaller number (dividable by 5)
+maxfile = 100 #last file is image249.JPG, enter 250 for train-test all of them. To train-test some of them, change to a smaller number (dividable by 5)
 
 def get_categories():
     cats = [i for i in range(1,1+maxfile/5)]
@@ -191,12 +191,15 @@ if __name__ == '__main__':
     libsvm.test(testing_histogram_file, model_file)
     print "################# Testing Process End ###################"
     print "######################## Results ########################"
-    predict = open(predict_file)
-    for cat in predict:
-        print "Category:", int(cat)
+    with open(predict_file) as predict:
+        content = predict.readlines()
+    total_line = len(content)
+    for line in range(0,total_line):
+        cat = int(content[line])
+        print "Category:", cat
         # Train file shows a range of filenames in that category, but one of them is not used in training process.
         # Not used one is the tester. The filename must be in the range of filenames in that category, means correct category
-        print "Train Files: image", str(5*(int(cat)-1)).zfill(3), "-", str(5*(int(cat)-1)+4).zfill(3)
-        print " Test Files:", test_files[int(cat)-1]
+        print "Train Files: image", str(5*(cat-1)).zfill(3), "-", str(5*(cat-1)+4).zfill(3)
+        print " Test Files:", test_files[line]
         print ""
     print "########################## End ##########################"
