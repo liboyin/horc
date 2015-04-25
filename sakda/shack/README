@@ -1,0 +1,5 @@
+All code and library files are in the 'CV' folder.
+To run the code, run file 'main.py'.
+Folder 'dataset' has all images with filename corrention.
+Folder 'CVdatafile' is used for storing all the output files
+The results print in the console. They group by category and involved images.
