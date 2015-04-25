@@ -19,7 +19,7 @@ predict_file = outputdir + '/trainingdata.svm.prediction'
 imagedir = '../dataset'
 basename = imagedir + '/image'
 ext = '.JPG'
-maxfile = 100 #last file is image249.JPG, enter 250 for train-test all of them. To train-test some of them, change to a smaller number (dividable by 5)
+maxfile = 20 #last file is image249.JPG, enter 250 for train-test all of them. To train-test some of them, change to a smaller number (dividable by 5)
 
 def get_categories():
     cats = [i for i in range(1,1+maxfile/5)]
