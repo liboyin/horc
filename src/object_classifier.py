@@ -9,6 +9,14 @@ import cv2
 from rootsift import RootSIFT
 from scipy.spatial.distance import euclidean as euclid_dist
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn import linear_model
+from sklearn.lda import LDA
+from sklearn.qda import QDA
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from scipy.spatial.distance import cosine as cos_dist
 
 img_dir = '../data/uni/'
 num_of_classes = 50
@@ -88,7 +96,15 @@ if __name__ == '__main__':
     X_train_dsc, y_train_dsc = get_X_Y(df[df['TYPE']=='TRAIN'])
 
     print('Training Classifier ...')
-    classifier = KNeighborsClassifier(n_neighbors=7, weights="distance", metric=euclid_dist)
+    classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
+    # classifier = linear_model.LogisticRegression()
+    # classifier = LDA()
+    # classifier = QDA()  # Doesn't work
+    # classifier = DecisionTreeClassifier()
+    # classifier = RandomForestClassifier()
+    # classifier = AdaBoostClassifier()
+    # classifier = SVC(kernel='poly')
+    # classifier = GaussianNB()
     classifier.fit(X_train_dsc, y_train_dsc)
 
     print('Testing ...')
