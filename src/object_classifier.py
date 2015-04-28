@@ -19,13 +19,13 @@ from sklearn.naive_bayes import GaussianNB
 from scipy.spatial.distance import cosine as cos_dist
 
 img_dir = '../data/uni/'
-num_of_classes = 50
-num_of_files_per_class = 4
+n_classes = 50
+n_files_per_class = 4
 
 def get_img_files(img_dir):
     imgs = filter(lambda x: ".JPG" in x, listdir(img_dir))
     df = pd.DataFrame(index=imgs, columns={'CLASS', 'SIFT_KP', 'SIFT_KP_DESC', 'TYPE'})
-    df["CLASS"] = np.repeat(np.linspace(0, num_of_classes-1, num=num_of_classes), num_of_files_per_class)
+    df["CLASS"] = np.repeat(np.linspace(0, n_classes-1, num=n_classes), n_files_per_class)
     return df
 
 def extract_SIFT(df):
@@ -61,7 +61,7 @@ def get_X_Y(df):
 def get_predictions(df, classifier):
     predictions = []
     for img in list(df.index):
-        votes = {i:0 for i in xrange(num_of_classes)}
+        votes = {i:0 for i in xrange(n_classes)}
         # print(votes)
         for dsc in df.loc[img, 'SIFT_KP_DESC']:
             votes[classifier.predict(dsc)[0]] += 1
