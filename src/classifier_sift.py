@@ -43,7 +43,7 @@ def extract_SIFT(df):
         # kps = detector.detect(img)
         # (kps, descs) = rs.compute(img, kps)
         key_points.append(kps)
-        kp_descriptors.append(descs.astype(np.uint16))
+        kp_descriptors.append(descs.astype(np.float32))
     df['SIFT_KP'] = key_points
     df['SIFT_KP_DESC'] = kp_descriptors
     return df
@@ -69,6 +69,18 @@ def get_predictions(df, classifier):
         predictions.append(max(votes, key=votes.get))
         # print(predictions)
     return predictions
+
+
+def get_predictions2(df, classifier):
+    predictions = []
+    for img in list(df.index):
+        votes = {i:0 for i in xrange(n_classes)}
+        for dsc in df.loc[img, 'SIFT_KP_DESC']:
+            _, result, _, _ = classifier.find_nearest(dsc, k=5)
+            votes[result] += 1
+        predictions.append(max(votes, key=votes.get))
+    return predictions
+
 
 def get_accuracy(predictions, truth):
     correct = sum(1 for p,t in zip(predictions, truth) if p==t)
@@ -107,8 +119,12 @@ if __name__ == '__main__':
     # classifier = GaussianNB()
     classifier.fit(X_train_dsc, y_train_dsc)
 
+
+
+
     print('Testing ...')
     df_test = df[df['TYPE']=='TEST']
     predictions = get_predictions(df_test, classifier)
+
 
     print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
