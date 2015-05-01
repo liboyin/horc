@@ -15,7 +15,7 @@ num_sift_kp = 25
 
 def make_df():
     df = pd.DataFrame(filter(lambda x: ".JPG" in x, listdir(img_dir)), columns=["name"])
-    df["class"] = np.repeat(np.linspace(0, 49), 4)
+    df["class"] = np.repeat(np.arange(50), 4)
     df["class"] = df["class"].astype("category")
     key_points, kp_descriptors = list(), list()
     df_name = list(df["name"])
