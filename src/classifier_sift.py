@@ -32,7 +32,7 @@ def extract_SIFT(df):
     key_points, kp_descriptors = [], []
 
     # rs = RootSIFT()
-    sift = cv2.SIFT(nfeatures=20)
+    sift = cv2.SIFT(nfeatures=25)
 
     # Loop over each image
     for img in list(df.index):
