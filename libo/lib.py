@@ -5,7 +5,7 @@ import numpy as np
 from data import num_sift_kp
 
 
-class SoftNearestClassClassifier:  # a class may contain several clusters of vector
+class SoftSetNearestNeighbour:  # a class may contain several clusters of vector
     # C: # of classes; N: # of vectors per training class; D: dimension of a vector
     def __init__(self, cdist):
         self.cdist = cdist  # collection pairwise distance: R^(A*D), R^(B*D) -> R^(A*B)
@@ -20,7 +20,7 @@ class SoftNearestClassClassifier:  # a class may contain several clusters of vec
         return np.divide(probs, probs.sum())
 
 
-class SoftNearestNeighbourClassifier:
+class SoftNearestNeighbour:
     # C: # of classes; D: dimension of data point
     def __init__(self, psim):
         self.psim = psim  # pairwise similarity: R^D, R^D -> R
