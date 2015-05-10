@@ -6,6 +6,11 @@ import numpy as np
 import pandas as pd
 import random
 from sklearn.svm import SVC
+from rootsift import RootSIFT
+from scipy.spatial.distance import euclidean as euclid_dist
+from sklearn import svm
+import graphlab as gl
+from sklearn.ensemble import GradientBoostingClassifier, AdaBoostClassifier
 
 from os import listdir
 from os.path import isfile, join
@@ -20,16 +25,20 @@ def init_df(img_dir):
     df["class"] = df["class"].astype("category")
     key_points, kp_descriptors = list(), list()
     df_name = list(df["name"])
-    sift = cv2.SIFT(nfeatures=20)
+    # sift = cv2.SIFT(nfeatures=20)
+    rs = RootSIFT()
     for i in range(0, 200):
         progress = int(i / 200.0 * 1000) / 10.0
         print("{} {}%".format(df_name[i], progress), end="\r")
         img = cv2.imread(join(img_dir, df_name[i]))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        kp, des = sift.detectAndCompute(img, None)
+        # kp, des = sift.detectAndCompute(img, None)
+        detector = cv2.FeatureDetector_create("SIFT")
+        kps = detector.detect(img)
+        (kp, desc) = rs.compute(img, kps)
         key_points.append(map(lambda x: {"pt": x.pt, "angle": x.angle, "size": x.size,
                                          "octave": x.octave, "response": x.response}, kp))
-        kp_descriptors.append(des.astype(np.uint16))
+        kp_descriptors.append(desc.astype(np.uint16))
     df["sift_key_points"] = key_points
     df["sift_kp_descriptors"] = kp_descriptors
     return df
@@ -81,13 +90,15 @@ def test(classifier, split_id):
         predict[i] = vote.argmax()
     return predict
 
-# classifier = KNeighborsClassifier(n_neighbors=5, weights="distance", metric=cos_dist)
-classifier = SVC(C=1000000.0, gamma=0.0, kernel='rbf')
-# scipy.spatial.distance.cosine is much faster than sklearn.metrics.pairwise.cosine_distances
+# classifier = KNeighborsClassifier(n_neighbors=5, weights="distance", metric=euclid_dist)
+# classifier = SVC(C=1000000.0, gamma=0.0, kernel='rbf')
+# classifier_svm = svm.SVC(kernel='poly')
+# scipy.spatial.distance.cosine is much
+classifier = AdaBoostClassifier(base_estimator=svm.SVC(probability=True,kernel='poly'),n_estimators=100)
 accuracy = np.zeros(10, dtype=np.uint8)
 for i in range(0, 10):
     train_x, train_y = get_training_set(i)
     predict = test(classifier.fit(train_x, train_y), i)
     accuracy[i] = sum(np.linspace(0, 49, num=50) == predict)
 print(accuracy)
-print("mean={}, sigma={}".format(np.mean(accuracy), np.std(accuracy)))
+print("mean={}, sigma={}".format(np.mean(accuracy)*2, np.std(accuracy)))
