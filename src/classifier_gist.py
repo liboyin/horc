@@ -2,15 +2,15 @@ __author__ = 'manabchetia'
 
 from os import listdir
 from os.path import join
-
 import pandas as pd
 from sklearn.cross_validation import train_test_split
 import numpy as np
 from PIL import Image
 import leargist as gist
 from sklearn.neighbors import KNeighborsClassifier
-from scipy.spatial.distance import cosine
 from scipy.spatial.distance import euclidean
+from sklearn.externals import joblib
+import pprint as pp
 
 
 img_dir = '../data/uni/'
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     print('Separating Training and Test files ...')
     X_train_file, X_test_file, y_train_file, y_test_file = train_test_split(list(df.index), list(df['CLASS']),
-                                                                            test_size=0.25)  # , random_state=42)
+                                                                            test_size=0.25, random_state=15)
     df.loc[X_test_file, 'TYPE'] = 'TEST'
     df.loc[X_train_file, 'TYPE'] = 'TRAIN'
 
@@ -58,8 +58,9 @@ if __name__ == '__main__':
     X_train = list(df_train['GIST_DESC'])
     y_train = list(df_train['CLASS'])
 
-    classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=euclidean)
+    classifier = KNeighborsClassifier(n_neighbors=2, weights='distance', metric=euclidean)
     classifier.fit(X_train, y_train)
+
 
     print('Testing ...')
     df_test = df[df['TYPE'] == 'TEST']
@@ -69,6 +70,9 @@ if __name__ == '__main__':
 
     print('Accuracy: {}%'.format(classifier.score(X_test, y_test) * 100))
 
+    predicted_probas = classifier.predict_proba(X_test)
+    pp.pprint(predicted_probas)
 
-
-
+    # http://scikit-learn.org/stable/modules/pipeline.html
+    # http://scikit-learn.org/stable/modules/ensemble.html
+    # http://w3facility.org/question/classifiying-a-set-of-images-into-classes/
