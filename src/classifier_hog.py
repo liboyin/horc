@@ -3,6 +3,7 @@ __author__ = 'manabchetia'
 import pandas as pd
 from os import listdir
 from os.path import join
+from pyneural import pyneural
 from sklearn.cross_validation import train_test_split
 import numpy as np
 import cv2
@@ -43,6 +44,11 @@ def extract_HOG(df):
     return df
 
 
+def get_accuracy(predictions, truth):
+    correct = sum(1 for p, t in zip(predictions, truth) if p == t)
+    return correct * 100 / len(predictions)
+
+
 if __name__ == '__main__':
     img_dir = '../data/uni/'
 
@@ -50,31 +56,65 @@ if __name__ == '__main__':
     df = get_img_files(img_dir)
 
     print('Separating Training and Test files ...')
-    X_train_file, X_test_file, y_train_file, y_test_file = train_test_split(list(df.index), list(df['CLASS']), test_size=0.25)#, random_state=42)
+    X_train_file, X_test_file, y_train_file, y_test_file = train_test_split(list(df.index), list(df['CLASS']), test_size=0.25, random_state=15)
     df.loc[X_test_file,  'TYPE'] = 'TEST'
     df.loc[X_train_file, 'TYPE'] = 'TRAIN'
 
     print('Extracting HOG features ...')
     df = extract_HOG(df)
 
+    # NEURAL NETWORK
     # Get X, Y
     print('Getting X,Y for training ...')
-    df_train = df[df['TYPE']=='TRAIN']
+    df_train = df[df['TYPE'] == 'TRAIN']
 
-    X_train = list(df_train['HOG_DESC'])
-    y_train = list(df_train['CLASS'])
+    features_train = np.asarray(list(df_train['HOG_DESC']))
+    labels_train = np.asarray(list(df_train['CLASS']), dtype=np.int8)
 
-    classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
-    classifier.fit(X_train, y_train)
+    n_rows, n_features = features_train.shape
+    n_labels = 50
 
+    labels_expanded = np.zeros((n_rows, n_labels), dtype=np.int8)
+    for i in xrange(n_rows):
+        labels_expanded[i][labels_train[i]] = 1
+
+    print('Training ...')
+    nn = pyneural.NeuralNet([n_features, (n_features + n_labels)/2,  n_labels])
+    nn.train(features_train, labels_expanded, 500, 40, 0.005, 0.0,
+             1.0)  # features, labels, iterations, batch size, learning rate, L2 penalty, decay multiplier
 
     print('Testing ...')
-    df_test = df[df['TYPE']=='TEST']
+    df_test = df[df['TYPE'] == 'TEST']
 
-    X_test = list(df_test['HOG_DESC'])
-    y_test = list(df_test['CLASS'])
+    features_test = np.asarray(list(df_test['HOG_DESC']))
+    labels_test = np.asarray(list(df_test['CLASS']))
 
-    print('Accuracy: {}%'.format(classifier.score(X_test, y_test)*100))
+    predictions = np.asarray(nn.predict_label(features_test), dtype=np.int8)
+    print(predictions)
+    print(" ")
+    print(labels_test)
+    print('Accuracy: {} %'.format(get_accuracy(predictions, labels_test)))
+
+
+    # KNN
+    # # Get X, Y
+    # print('Getting X,Y for training ...')
+    # df_train = df[df['TYPE']=='TRAIN']
+    #
+    # X_train = list(df_train['HOG_DESC'])
+    # y_train = list(df_train['CLASS'])
+    #
+    # classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
+    # classifier.fit(X_train, y_train)
+    #
+    #
+    # print('Testing ...')
+    # df_test = df[df['TYPE']=='TEST']
+    #
+    # X_test = list(df_test['HOG_DESC'])
+    # y_test = list(df_test['CLASS'])
+    #
+    # print('Accuracy: {}%'.format(classifier.score(X_test, y_test)*100))
 
 
 

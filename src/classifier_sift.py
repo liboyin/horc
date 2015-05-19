@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.cross_validation import train_test_split
 import numpy as np
 import cv2
+from pyneural import pyneural
 from sklearn.neighbors import KNeighborsClassifier
 from scipy.spatial.distance import cosine as cos_dist
 
@@ -67,7 +68,7 @@ def get_predictions2(df, classifier):
     for img in list(df.index):
         votes = {i: 0 for i in xrange(n_classes)}
         for dsc in df.loc[img, 'SIFT_KP_DESC']:
-            _, result, _, _ = classifier.find_nearest(dsc, k=5)
+            result = classifier.predict_label(dsc[0])
             votes[result] += 1
         predictions.append(max(votes, key=votes.get))
     return predictions
@@ -93,17 +94,44 @@ if __name__ == '__main__':
     print('Extracting SIFT features ...')
     df = extract_SIFT(df)
 
-    # Get X, Y
-    print('Getting X,Y for training ...')
-    df_train = df[df['TYPE'] == 'TRAIN']
-    X_train_dsc, y_train_dsc = get_X_Y(df[df['TYPE'] == 'TRAIN'])
+    # # NEURAL NETWORKS
+    # # Get X, Y
+    # print('Getting X,Y for training ...')
+    # df_train = df[df['TYPE'] == 'TRAIN']
+    #
+    # features_train = np.asarray(list(df_train['SIFT_DESC']))
+    # labels_train = np.asarray(list(df_train['CLASS']), dtype=np.int8)
+    #
+    # n_rows, n_features = features_train.shape  # 150, 960
+    # n_labels = 50
+    #
+    # labels_expanded = np.zeros((n_rows, n_labels), dtype=np.int8)
+    # for i in xrange(n_rows):
+    #     labels_expanded[i][labels_train[i]] = 1
+    #
+    # print('Training ...')
+    # classifier = pyneural.NeuralNet([n_features, 400, n_labels])
+    # classifier.train(features_train, labels_expanded, 5000, 40, 0.005, 0.0,
+    #          1.0)  # features, labels, iterations, batch size, learning rate, L2 penalty, decay multiplier
+    #
+    # print('Testing ...')
+    # df_test = df[df['TYPE'] == 'TEST']
+    # predictions = get_predictions2(df_test, classifier)
+    #
+    # print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
 
-    print('Training Classifier ...')
-    classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
-    classifier.fit(X_train_dsc, y_train_dsc)
-
-    print('Testing ...')
-    df_test = df[df['TYPE'] == 'TEST']
-    predictions = get_predictions(df_test, classifier)
-
-    print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
+    # KNN
+    # # Get X, Y
+    # print('Getting X,Y for training ...')
+    # df_train = df[df['TYPE'] == 'TRAIN']
+    # X_train_dsc, y_train_dsc = get_X_Y(df[df['TYPE'] == 'TRAIN'])
+    #
+    # print('Training Classifier ...')
+    # classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
+    # classifier.fit(X_train_dsc, y_train_dsc)
+    #
+    # print('Testing ...')
+    # df_test = df[df['TYPE'] == 'TEST']
+    # predictions = get_predictions(df_test, classifier)
+    #
+    # print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
