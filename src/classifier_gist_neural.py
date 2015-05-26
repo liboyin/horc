@@ -13,6 +13,8 @@ from pandas.io.pickle import read_pickle
 from sklearn.externals import joblib
 import cPickle
 
+# https://github.com/fchollet/keras/blob/master/examples/mnist_nn.py
+
 # from nolearn.dbn import DBN
 
 
@@ -21,6 +23,9 @@ img_dir = '../data/final'
 n_classes = 50
 # n_files_per_class = 4
 n_files_per_class = 240
+clf_cache = 'pyneural_model_5000' # 240 images per class
+# clf_cache = 'pyneural_model_4' # 4 images per class
+
 
 
 def get_img_files(img_dir):
@@ -70,7 +75,7 @@ def get_df(df_cache):
     return df
 
 
-def get_classifier(clf_cache, df):
+def get_classifier(clf_cache, df, n_iter):
     # global clf
     if isfile(clf_cache):
         print('Model found. \nLoading Model from disk')
@@ -91,7 +96,7 @@ def get_classifier(clf_cache, df):
             labels_expanded[i][labels_train[i]] = 1
 
         print('Training ...')
-        clf = pyneural.NeuralNet([n_features, 400, n_classes])
+        clf = pyneural.NeuralNet([n_features, n_iter, n_classes])
         clf.train(features_train, labels_expanded, 10, 40, 0.005, 0.0,
                   1.0)  # features, labels, iterations, batch size, learning rate, L2 penalty, decay multiplier
         # with open(clf_cache, 'wb') as fid:
@@ -106,8 +111,10 @@ if __name__ == '__main__':
     # PyNeural
     # Get X, Y
 
-    clf_cache = 'pyneural_model_5000'
-    clf = get_classifier(clf_cache, df)
+    # if isfile(clf_cache):
+    clf = get_classifier(clf_cache, df, n_iter=3000)
+    joblib.dump(clf, 'filename.pkl')
+
 
     print('Testing ...')
     df_test = df[df['TYPE'] == 'TEST']
