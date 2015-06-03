@@ -4,7 +4,7 @@ clear all
 START_CAT=1;
 
 % Define end category, 2=end at image004, 3=end at image009, and so on
-END_CAT=50;
+END_CAT=4;
 
 % Define a number of cluster
 nc=floor((END_CAT-START_CAT)*1.6);
@@ -49,6 +49,7 @@ parfor cat=1:END_CAT-START_CAT
         filename=fullfile('./dataset/',trainingSet((cat-1)*3+eachfile).name);
         fprintf('Sifting File: %s\n', filename);
         I = imreadbw(filename);
+%        I = rgb2gray(imread(filename));
         [frames{eachfile},descriptors{eachfile}] = sift(I);
     end
     descriptor_bank(cat).category=cat+START_CAT;
@@ -96,6 +97,7 @@ parfor cat=1:END_CAT-START_CAT
     filename=fullfile('./dataset/',testingSet(cat).name);
     fprintf('Testing File: %s\n', filename);
     I = imreadbw(filename);
+%    I = rgb2gray(imread(filename));
     [frames,descriptors] = sift(I);
     distances=dist2(descriptors',centers);
     [minvals, mininds] = min(distances, [], 2);
@@ -119,7 +121,7 @@ for cat=1:END_CAT-START_CAT
         error=error+1;
     end
 end
-fprintf('Error: %d, Percentage: %2.2f%%\n',error,error/END_CAT*100);
+fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-(error/(END_CAT-START_CAT)*100));
 fprintf('################ END #################\n');
 
 figure(1);

@@ -28,6 +28,7 @@ for cat=START_CAT:END_CAT
         end
     end
 end
+testingSet=[testingSet dir(fullfile('./dataset/',imgSets(201).name))];
 
 %% Training Images Extract Sift and Store in Structure (category,desc1,desc2,desc3)
 fprintf('############## LEARNING ##############\n');
@@ -38,6 +39,7 @@ parfor cat=1:END_CAT-START_CAT
         filename=fullfile('./dataset/',trainingSet((cat-1)*3+eachfile).name);
         fprintf('Sifting File: %s\n', filename);
         I = imreadbw(filename);
+%        I = imreadbw(filename);
         I = imfilter(I,kernel);
         %I = imcrop(I, [80,30,180,180]);
         %I = imcrop(I, [50,20,220,200]);
@@ -52,11 +54,12 @@ fprintf('################ END #################\n\n');
 
 %% Testing Images Extract Sift
 fprintf('############ CLASSIFYING #############\n');
-matches=zeros(END_CAT-START_CAT);
-parfor cat=1:END_CAT-START_CAT
+matches=zeros((END_CAT-START_CAT)+2);
+parfor cat=1:(END_CAT-START_CAT)+2
     filename=fullfile('./dataset/',testingSet(cat).name);
     fprintf('Testing File: %s\n', filename);
-    I = imreadbw(filename);
+     I = imreadbw(filename);
+%    I = rgb2gray(imread(filename));
     I = imfilter(I,kernel);
     %I = imcrop(I, [80,30,180,180]);
     %I = imcrop(I, [50,20,220,200]);
@@ -72,16 +75,23 @@ parfor cat=1:END_CAT-START_CAT
 end
 fprintf('################ END #################\n\n');
 
+
+
+
+
+
+
+
 %% Analyse Result
 fprintf('############## RESULTS ###############\n');
 [Max, Index]=max(matches,[],2);
 error=0;
-for cat=1:END_CAT-START_CAT
+for cat=1:(END_CAT-START_CAT)+2
     fprintf('File: %s\n',testingSet(cat).name);
     fprintf('Predict Category: %d, Filename Range: image%03d - %03d\n\n',Index(cat),((Index(cat)-1)+START_CAT-1)*5+1,((Index(cat)-1)+START_CAT-1)*5+4);
     if cat~=Index(cat)
         error=error+1;
     end
 end
-fprintf('Error: %d, Percentage: %2.2f%%\n',error,error/END_CAT*100);
+fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-(error/(END_CAT-START_CAT)*100));
 fprintf('################ END #################\n');

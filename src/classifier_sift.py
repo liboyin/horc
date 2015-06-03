@@ -10,6 +10,7 @@ import cv2
 from pyneural import pyneural
 from sklearn.neighbors import KNeighborsClassifier
 from scipy.spatial.distance import cosine as cos_dist
+from scipy.spatial.distance import euclidean
 
 
 img_dir = '../data/uni/'
@@ -121,17 +122,17 @@ if __name__ == '__main__':
     # print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
 
     # KNN
-    # # Get X, Y
-    # print('Getting X,Y for training ...')
-    # df_train = df[df['TYPE'] == 'TRAIN']
-    # X_train_dsc, y_train_dsc = get_X_Y(df[df['TYPE'] == 'TRAIN'])
-    #
-    # print('Training Classifier ...')
-    # classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=cos_dist)
-    # classifier.fit(X_train_dsc, y_train_dsc)
-    #
-    # print('Testing ...')
-    # df_test = df[df['TYPE'] == 'TEST']
-    # predictions = get_predictions(df_test, classifier)
-    #
-    # print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
+    # Get X, Y
+    print('Getting X,Y for training ...')
+    df_train = df[df['TYPE'] == 'TRAIN']
+    X_train_dsc, y_train_dsc = get_X_Y(df[df['TYPE'] == 'TRAIN'])
+
+    print('Training Classifier ...')
+    classifier = KNeighborsClassifier(n_neighbors=4, weights='distance', metric=euclidean)
+    classifier.fit(X_train_dsc, y_train_dsc)
+
+    print('Testing ...')
+    df_test = df[df['TYPE'] == 'TEST']
+    predictions = get_predictions(df_test, classifier)
+
+    print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
