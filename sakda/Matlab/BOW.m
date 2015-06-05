@@ -3,26 +3,18 @@ clear all
 % Define start category, 1=start from image001, 2=start from image006, and so on 
 START_CAT=1;
 
-% Define end category, 2=end at image004, 3=end at image009, and so on
-END_CAT=4;
+% Define end category, 2=end at image009, 3=end at image014, and so on
+END_CAT=50;
 
 % Define a number of cluster
-nc=floor((END_CAT-START_CAT)*1.6);
+nc=floor((END_CAT-START_CAT+1)*1.5);
 
 % Define a number of descriptors picked from each training image
-nd=5;
+nd=80;
 
 % Define where the images are located
-imgFolder = fullfile('./dataset/');
+imgFolder = fullfile('./dataset/','*.JPG');
 imgSets = dir(imgFolder);
-
-% remove file name: . and .. from image set
-if (imgSets(1).name == '.')
-   imgSets(1) = [];
-end
-if strcmp(imgSets(1).name,'..')
-   imgSets(1) = [];
-end
 
 %% Separate images
 trainingSet=[];
@@ -42,14 +34,13 @@ end
 fprintf('############## LEARNING ##############\n');
 descriptor_bank=struct;
 frame_bank=struct;
-parfor cat=1:END_CAT-START_CAT
+parfor cat=1:(END_CAT-START_CAT)+1
     descriptors=cell(1,3);
     frames=cell(1,3);
     for eachfile=1:3
         filename=fullfile('./dataset/',trainingSet((cat-1)*3+eachfile).name);
         fprintf('Sifting File: %s\n', filename);
         I = imreadbw(filename);
-%        I = rgb2gray(imread(filename));
         [frames{eachfile},descriptors{eachfile}] = sift(I);
     end
     descriptor_bank(cat).category=cat+START_CAT;
@@ -63,25 +54,25 @@ parfor cat=1:END_CAT-START_CAT
 end
 
 %% Sort scale of frames from large to small
-d=zeros(3*nd*(END_CAT-START_CAT),128);
-for cat=1:END_CAT-START_CAT
+d=zeros(3*nd*(END_CAT-START_CAT+1),128);
+for cat=1:(END_CAT-START_CAT)+1
     [Y1,I1]=sort(frame_bank(cat).frm1(3,:),2,'descend');
     [Y2,I2]=sort(frame_bank(cat).frm2(3,:),2,'descend');
     [Y3,I3]=sort(frame_bank(cat).frm3(3,:),2,'descend');
     
     % Pick descriptors from top nd frames scale
     for eachd=1:nd
-        d(eachd+(cat-1)*3*nd,:)=descriptor_bank(cat).desc1(I1(eachd+3),:);
-        d(eachd+nd+(cat-1)*3*nd,:)=descriptor_bank(cat).desc2(I2(eachd+3),:);
-        d(eachd+(nd*2)+(cat-1)*3*nd,:)=descriptor_bank(cat).desc3(I3(eachd+3),:);
+        d(eachd+(cat-1)*3*nd,:)=descriptor_bank(cat).desc1(I1(eachd+0),:);
+        d(eachd+nd+(cat-1)*3*nd,:)=descriptor_bank(cat).desc2(I2(eachd+0),:);
+        d(eachd+(nd*2)+(cat-1)*3*nd,:)=descriptor_bank(cat).desc3(I3(eachd+0),:);
     end
 end
 
 %% Find k-means and generate bag of words
-trainingH=zeros(nc,3*(END_CAT-START_CAT));
+trainingH=zeros(nc,3*(END_CAT-START_CAT+1));
 [clusters, centers]=kmeans(d,nc);
 list=genvarname({'desc','desc','desc','desc'});
-for cat=1:END_CAT-START_CAT
+for cat=1:(END_CAT-START_CAT)+1
     for eachfile=1:3
         distances=dist2(descriptor_bank(cat).(list{eachfile+1}),centers);
         [minvals, mininds] = min(distances, [], 2);
@@ -92,20 +83,19 @@ fprintf('################ END #################\n\n');
 
 %% Testing Images Extract Sift
 fprintf('############ CLASSIFYING #############\n');
-testingH=zeros(nc,END_CAT-START_CAT);
-parfor cat=1:END_CAT-START_CAT
+testingH=zeros(nc,END_CAT-START_CAT+1);
+parfor cat=1:(END_CAT-START_CAT)+1
     filename=fullfile('./dataset/',testingSet(cat).name);
     fprintf('Testing File: %s\n', filename);
     I = imreadbw(filename);
-%    I = rgb2gray(imread(filename));
     [frames,descriptors] = sift(I);
     distances=dist2(descriptors',centers);
     [minvals, mininds] = min(distances, [], 2);
     testingH(:,cat)=histc(mininds,1:nc);
 end
-distances=zeros(END_CAT-START_CAT,3*(END_CAT-START_CAT));
-for cat=1:END_CAT-START_CAT
-    for eachbag=1:3*(END_CAT-START_CAT)
+distances=zeros(END_CAT-START_CAT+1,3*(END_CAT-START_CAT+1));
+for cat=1:(END_CAT-START_CAT)+1
+    for eachbag=1:3*(END_CAT-START_CAT+1)
         distances(cat,eachbag)=dist2(trainingH(:,eachbag)',testingH(:,cat)');
     end
 end
@@ -114,14 +104,14 @@ end
 [Min, Index]=min(distances,[],2);
 result=ceil(Index/3);
 error=0;
-for cat=1:END_CAT-START_CAT
+for cat=1:(END_CAT-START_CAT)+1
     fprintf('File: %s\n',testingSet(cat).name);
     fprintf('Predict Category: %d, Filename Range: image%03d - %03d\n\n',result(cat),((result(cat)-1)+START_CAT-1)*5+1,((result(cat)-1)+START_CAT-1)*5+4);
     if cat~=result(cat)
         error=error+1;
     end
 end
-fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-(error/(END_CAT-START_CAT)*100));
+fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-error/(END_CAT-START_CAT+1)*100);
 fprintf('################ END #################\n');
 
 figure(1);

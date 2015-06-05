@@ -1,17 +1,17 @@
 clear all
 
+% Set the start category
 START_CAT=1;
+
+% Set the end category
 END_CAT=50;
 
-kernel = -1 * ones(3)/9;
-imgFolder = fullfile('./dataset/');
+% Set kernel
+kernel = fspecial('gaussian',3);
+
+% Set image path
+imgFolder = fullfile('./dataset/','*.JPG');
 imgSets = dir(imgFolder);
-if (imgSets(1).name == '.')
-   imgSets(1) = [];
-end
-if strcmp(imgSets(1).name,'..')
-   imgSets(1) = [];
-end
 
 %% Separate images
 trainingSet=[];
@@ -28,22 +28,19 @@ for cat=START_CAT:END_CAT
         end
     end
 end
-testingSet=[testingSet dir(fullfile('./dataset/',imgSets(201).name))];
 
 %% Training Images Extract Sift and Store in Structure (category,desc1,desc2,desc3)
 fprintf('############## LEARNING ##############\n');
 descriptor_bank=struct;
-parfor cat=1:END_CAT-START_CAT
+parfor cat=1:(END_CAT-START_CAT)+1
     descriptors=cell(1,3);
     for eachfile=1:3
         filename=fullfile('./dataset/',trainingSet((cat-1)*3+eachfile).name);
         fprintf('Sifting File: %s\n', filename);
         I = imreadbw(filename);
-%        I = imreadbw(filename);
         I = imfilter(I,kernel);
-        %I = imcrop(I, [80,30,180,180]);
-        %I = imcrop(I, [50,20,220,200]);
-        [frames,descriptors{eachfile}] = sift(I,'EdgeThreshold',12);
+        I = imcomplement(I);
+        [frames,descriptors{eachfile}] = sift(I,'edgeThreshold',12);
     end
     descriptor_bank(cat).category=cat+START_CAT;
     descriptor_bank(cat).desc1=descriptors{1};
@@ -54,17 +51,15 @@ fprintf('################ END #################\n\n');
 
 %% Testing Images Extract Sift
 fprintf('############ CLASSIFYING #############\n');
-matches=zeros((END_CAT-START_CAT)+2);
-parfor cat=1:(END_CAT-START_CAT)+2
+matches=zeros(END_CAT-START_CAT+1);
+parfor cat=1:(END_CAT-START_CAT)+1
     filename=fullfile('./dataset/',testingSet(cat).name);
     fprintf('Testing File: %s\n', filename);
-     I = imreadbw(filename);
-%    I = rgb2gray(imread(filename));
+    I = imreadbw(filename);
     I = imfilter(I,kernel);
-    %I = imcrop(I, [80,30,180,180]);
-    %I = imcrop(I, [50,20,220,200]);
-    [frames,descriptors] = sift(I,'EdgeThreshold',12);
-    for testwithcat=1:END_CAT-START_CAT
+    I = imcomplement(I);
+    [frames,descriptors] = sift(I,'edgeThreshold',12);
+    for testwithcat=1:(END_CAT-START_CAT)+1
         matches1 = siftmatch(descriptors, descriptor_bank(testwithcat).desc1);
         matches2 = siftmatch(descriptors, descriptor_bank(testwithcat).desc2);
         matches3 = siftmatch(descriptors, descriptor_bank(testwithcat).desc3);
@@ -75,23 +70,16 @@ parfor cat=1:(END_CAT-START_CAT)+2
 end
 fprintf('################ END #################\n\n');
 
-
-
-
-
-
-
-
 %% Analyse Result
 fprintf('############## RESULTS ###############\n');
 [Max, Index]=max(matches,[],2);
 error=0;
-for cat=1:(END_CAT-START_CAT)+2
+for cat=1:(END_CAT-START_CAT)+1
     fprintf('File: %s\n',testingSet(cat).name);
     fprintf('Predict Category: %d, Filename Range: image%03d - %03d\n\n',Index(cat),((Index(cat)-1)+START_CAT-1)*5+1,((Index(cat)-1)+START_CAT-1)*5+4);
     if cat~=Index(cat)
         error=error+1;
     end
 end
-fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-(error/(END_CAT-START_CAT)*100));
+fprintf('Error: %d, Percentage: %2.2f%% correct!!!\n',error,100-(error/(END_CAT-START_CAT+1)*100));
 fprintf('################ END #################\n');
