@@ -26,13 +26,13 @@ def get_sift_descriptors(sift, img):
 def get_hsv_histograms(img):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     hue_hist = np.histogram(img[:, :, 0].ravel(), bins=181, range=(0, 180))[0]  # [0, 180] closed interval
-    sat_hist = np.histogram(img[:, :, 1].ravel(), bins=256, range=(0, 255))[0]
+    sat_hist = np.histogram(img[:, :, 1].ravel(), bins=256, range=(0, 255))[0]  # [0, 255] closed interval
     val_hist = np.histogram(img[:, :, 2].ravel(), bins=256, range=(0, 255))[0]
     return hue_hist, sat_hist, val_hist
 
 
 def get_rgb_histograms(img):
-    red_hist = np.histogram(img[:, :, 0].ravel(), bins=256, range=(0, 255))[0]  # [0, 255] closed interval
+    red_hist = np.histogram(img[:, :, 0].ravel(), bins=256, range=(0, 255))[0]
     green_hist = np.histogram(img[:, :, 1].ravel(), bins=256, range=(0, 255))[0]
     blue_hist = np.histogram(img[:, :, 2].ravel(), bins=256, range=(0, 255))[0]
     return red_hist, green_hist, blue_hist
@@ -71,12 +71,13 @@ def lazy_df():
 def new_split():
     split = ['train'] * C * M
     for i in range(0, C):
-        split[i * M + random.randint(0, M - 1)] = 'test'
+        split[i * M + random.randint(0, M - 1)] = 'test'  # one datapoint in each class is used as test
     return split
 
 
 def get_split_df(num_split):
     df = lazy_df()
+    print('splitting train/test...', end='\r')
     for i in range(0, num_split):
         split_name = 'split_' + str(i)
         df[split_name] = new_split()
