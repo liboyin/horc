@@ -1,0 +1,20 @@
+All codes were written using Anaconda Python 2.7 and Matlab 2015a in Mac OS 10.10
+All python files can be run as `python <filename>.py`
+All parameter changes can be found inside the scripts.
+
+Requirements:
+1. Install python package `pylearngist` as described in https://pypi.python.org/pypi/pyleargist/1.0.1
+2. Python package `Keras` can be cloned from https://github.com/fchollet/keras
+   a. Keras requires numpy, scipy and theano
+   b. After cloning, run `sudo python setup.py install`
+3. Python Image Library can be installed using `pip install Pillow`
+4. Scikit-Learn, Scikit-Image can be installed using `pip install scikit-learn`, `pip install scikit-image`
+5. Open CV was installed using `brew install opencv`
+6. Pandas was installed using `pip install pandas`
+
+Files:
+1. Run `create_dataset.m` to create an augmented dataset.
+2. Run `classifier_neural_deepnn.py` to run a classifier based on Feed Forward Neural network and GIST features.
+3. Run `classifier_sift.py` to run a classifier based on kNN and SIFT features.
+4. Run `classifier_PCA.py` to run a classifier based on kNN and SIFT features.
+5. Run `classifier_hog.py` to run a classifier based on kNN and hog features.

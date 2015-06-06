@@ -1,3 +1,7 @@
+"""
+This script trains a kNN classifier based on SIFT features
+"""
+
 __author__ = 'manabchetia'
 
 from os import listdir
@@ -7,11 +11,8 @@ import pandas as pd
 from sklearn.cross_validation import train_test_split
 import numpy as np
 import cv2
-from pyneural import pyneural
 from sklearn.neighbors import KNeighborsClassifier
-from scipy.spatial.distance import cosine as cos_dist
 from scipy.spatial.distance import euclidean
-
 
 img_dir = '../data/uni/'
 n_classes = 50
@@ -19,6 +20,11 @@ n_files_per_class = 4
 
 
 def get_img_files(img_dir):
+    """
+    This function reads the filenames from a directory, assigns labels to the files and saves them to a dataframe
+    :param img_dir: path of images
+    :return: dataframe
+    """
     imgs = filter(lambda x: ".JPG" in x, listdir(img_dir))
     df = pd.DataFrame(index=imgs, columns={'CLASS', 'SIFT_KP', 'SIFT_KP_DESC', 'TYPE'})
     df["CLASS"] = np.repeat(np.linspace(0, n_classes - 1, num=n_classes), n_files_per_class)
@@ -26,9 +32,13 @@ def get_img_files(img_dir):
 
 
 def extract_SIFT(df):
+    """
+    This function extract SIFT keypoints and descriptors from images and saves them in SIFT_KP, SIFT_KP_DESC column of dataframe respectively
+    :param df: dataframe containing filename as indices
+    :return: dataframe containing SFIT keypoints and descriptors
+    """
     key_points, kp_descriptors = [], []
 
-    # rs = RootSIFT()
     sift = cv2.SIFT(nfeatures=25)
 
     # Loop over each image
@@ -43,6 +53,11 @@ def extract_SIFT(df):
 
 
 def get_X_Y(df):
+    """
+    This function gets features (X) and labels (Y) from a dataframe
+    :param df: keypoints and descriptors
+    :return: lists containing features (X), labels (Y)
+    """
     X, y = [], []
     for img in list(df.index):
         for dsc in df.loc[img, 'SIFT_KP_DESC']:
@@ -52,37 +67,36 @@ def get_X_Y(df):
 
 
 def get_predictions(df, classifier):
+    """
+    This function predicts the output of a classifier
+    :param df: data frame containing SIFT keypoints and descriptors
+    :param classifier: any classifier such as kNN, SVM from scikit-learn library
+    :return: predictions from learnt classifier
+    """
     predictions = []
     for img in list(df.index):
         votes = {i: 0 for i in xrange(n_classes)}
-        # print(votes)
+        # Get majority votes
         for dsc in df.loc[img, 'SIFT_KP_DESC']:
             votes[classifier.predict(dsc)[0]] += 1
-            # print(votes)
-        predictions.append(max(votes, key=votes.get))
-        # print(predictions)
-    return predictions
 
-
-def get_predictions2(df, classifier):
-    predictions = []
-    for img in list(df.index):
-        votes = {i: 0 for i in xrange(n_classes)}
-        for dsc in df.loc[img, 'SIFT_KP_DESC']:
-            result = classifier.predict_label(dsc[0])
-            votes[result] += 1
         predictions.append(max(votes, key=votes.get))
+
     return predictions
 
 
 def get_accuracy(predictions, truth):
+    """
+    This function prints the accuracy
+    :param predictions: predicted lables
+    :param truth: ground thruth
+    :return: accuracy in %
+    """
     correct = sum(1 for p, t in zip(predictions, truth) if p == t)
     return correct * 100 / len(predictions)
 
 
 if __name__ == '__main__':
-    img_dir = '../data/uni/'
-
     print('Reading image files ...')
     df = get_img_files(img_dir)
 
@@ -94,32 +108,6 @@ if __name__ == '__main__':
 
     print('Extracting SIFT features ...')
     df = extract_SIFT(df)
-
-    # # NEURAL NETWORKS
-    # # Get X, Y
-    # print('Getting X,Y for training ...')
-    # df_train = df[df['TYPE'] == 'TRAIN']
-    #
-    # features_train = np.asarray(list(df_train['SIFT_DESC']))
-    # labels_train = np.asarray(list(df_train['CLASS']), dtype=np.int8)
-    #
-    # n_rows, n_features = features_train.shape  # 150, 960
-    # n_labels = 50
-    #
-    # labels_expanded = np.zeros((n_rows, n_labels), dtype=np.int8)
-    # for i in xrange(n_rows):
-    #     labels_expanded[i][labels_train[i]] = 1
-    #
-    # print('Training ...')
-    # classifier = pyneural.NeuralNet([n_features, 400, n_labels])
-    # classifier.train(features_train, labels_expanded, 5000, 40, 0.005, 0.0,
-    #          1.0)  # features, labels, iterations, batch size, learning rate, L2 penalty, decay multiplier
-    #
-    # print('Testing ...')
-    # df_test = df[df['TYPE'] == 'TEST']
-    # predictions = get_predictions2(df_test, classifier)
-    #
-    # print('Accuracy: {} %'.format(get_accuracy(predictions, list(df_test['CLASS']))))
 
     # KNN
     # Get X, Y

@@ -26,10 +26,11 @@ from six.moves import range
 batch_size = 32
 nb_classes = 10
 nb_epoch = 200
-data_augmentation = True
+data_augmentation = False
 
 # the data, shuffled and split between tran and test sets
-(X_train, y_train), (X_test, y_test) = cifar10.load_data(test_split=0.1)
+(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+print(X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
 
