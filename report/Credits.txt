@@ -1,0 +1,14 @@
+Credits and Contributions
+
+My work on this project is highly focused. I started with SIFT + nearest neighbour classifier, and gradually improved my solution to include Set nearest neighbour and hue histogram. My final solution is elegant, fast, and has a probability interpretation. In addition, I acted as the group leader.
+
+During the early stage of this project, Manab tried many different features and classification algorithms, but blindly. Many of these approaches has no theoretical fundations, where he simply took existing tools and assembled in different ways. Nevertheless, Manab developed the GIST + neural network approach in later period of this project, which is a highly generalised solution with many nice tricks.
+
+Sakda has not coded Python before. He went through huge obstacles at the initial stage of this project, when he tested and customised Shackenberg's Bag of visual words code written in Python. His work laid fundations to the Set nearest neighbour algorithm. He also came up with the siftmatch approach, which is surprisingly simple.
+
+In general, the three members contributed equally to this project. For the project report, it was originally planned that Libo shall write the project report. But since we finally came up with more than one solution, everyone wrote about their own solutoins, and the final report was rephrased by Libo for consistancy.
+
+Special thanks to my teammates, Manab and Sakda.
+
+Libo Yin
+u5483742
